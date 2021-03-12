@@ -203,13 +203,21 @@ class ReuseBufferInserter final : public IRMutator {
           // min_expr = x, max_expr = x+2
           Expr min_expr = substitute(min_map, expr_list[0][dim]);
           Expr max_expr = substitute(max_map, expr_list[0][dim]);
+          //LOG(INFO) << "expr_list[0][dim]: " << expr_list[0][dim];
+          //LOG(INFO) << "min_expr: " << min_expr;
+          //LOG(INFO) << "max_expr: " << max_expr;
           size_t min_index = 0;
           for (size_t i = 1; i < expr_list.size(); i++) {
             Expr new_min_expr = substitute(min_map, expr_list[i][dim]);
             Expr new_max_expr = substitute(max_map, expr_list[i][dim]);
+            LOG(INFO) << "expr_list[" << i << "][dim]: " << expr_list[i][dim];
+            LOG(INFO) << "new_min_expr: " << new_min_expr;
+            LOG(INFO) << "new_max_expr: " << new_max_expr;
             // TODO: for comparison, mod is not allowed
             Expr min_diff = Simplify(new_min_expr - min_expr);
             Expr max_diff = Simplify(new_max_expr - max_expr);
+            LOG(INFO) << "min_diff: " << min_diff;
+            LOG(INFO) << "max_diff: " << max_diff;
             if (!is_const(min_diff) || !is_const(max_diff))
               LOG(FATAL) << "The bound of the reuse region cannot be determined";
             if (is_one(Simplify(min_diff <= 0))) {
@@ -240,6 +248,8 @@ class ReuseBufferInserter final : public IRMutator {
               LOG(FATAL) << "Irregular access pattern is not yet supported";
             // check if there is overlap between reuse axis
             // e.g. next_min = y+1, max_incr = y+2
+            LOG(INFO) << "next_min: " << next_min;
+            LOG(INFO) << "max_expr: " << max_expr;
             Expr compare = Simplify(max_expr > next_min);
             if (is_zero(compare))
               LOG(FATAL) << "No reuse is found in axis " << op->loop_var; 
