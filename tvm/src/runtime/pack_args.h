@@ -1,8 +1,7 @@
 /*!
  *  Copyright (c) 2017 by Contributors
  * \file pack_args.h
- * \brief Utility to pack TVMArgs to other type-erased fution calling
- * convention.
+ * \brief Utility to pack TVMArgs to other type-erased fution calling convention.
  *
  *  Two type erased function signatures are supported.
  *   - cuda_style(void** args, int num_args);
@@ -11,12 +10,12 @@
  *                 union_32bit args[N], int num_args);
  *      - Pack buffer by address, pack rest parameter into 32bit union buffer.
  */
-#ifndef RUNTIME_PACK_ARGS_H_
-#define RUNTIME_PACK_ARGS_H_
+#ifndef TVM_RUNTIME_PACK_ARGS_H_
+#define TVM_RUNTIME_PACK_ARGS_H_
 
 #include <tvm/runtime/c_runtime_api.h>
-#include <cstring>
 #include <vector>
+#include <cstring>
 
 namespace TVM {
 namespace runtime {
@@ -38,11 +37,10 @@ union ArgUnion {
  *
  * \return The wrapped packed function.
  */
-template <typename F>
+template<typename F>
 inline PackedFunc PackFuncVoidAddr(F f, const std::vector<TVMType>& arg_types);
 /*!
- * \brief Create a packed function that from function only packs buffer
- * arguments.
+ * \brief Create a packed function that from function only packs buffer arguments.
  *
  * \param f with signiture (TVMArgs args, TVMRetValue* rv, ArgUnion* pack_args)
  * \param arg_types The arguments type information.
@@ -50,20 +48,18 @@ inline PackedFunc PackFuncVoidAddr(F f, const std::vector<TVMType>& arg_types);
  *
  * \return The wrapped packed function.
  */
-template <typename F>
-inline PackedFunc PackFuncNonBufferArg(F f,
-                                       const std::vector<TVMType>& arg_types);
+template<typename F>
+inline PackedFunc PackFuncNonBufferArg(F f, const std::vector<TVMType>& arg_types);
 /*!
- * \brief Create a packed function that from function that takes a packed
- * arguments.
+ * \brief Create a packed function that from function that takes a packed arguments.
  *
- * \param f with signature (TVMArgs args, TVMRetValue* rv, void* pack_args,
- * size_t nbytes) \param arg_types The arguments that wish to get from \tparam F
- * the function type
+ * \param f with signature (TVMArgs args, TVMRetValue* rv, void* pack_args, size_t nbytes)
+ * \param arg_types The arguments that wish to get from
+ * \tparam F the function type
  *
  * \return The wrapped packed function.
  */
-template <typename F>
+template<typename F>
 inline PackedFunc PackFuncPackedArg(F f, const std::vector<TVMType>& arg_types);
 /*!
  * \brief Extract number of buffer argument from the argument types.
@@ -74,21 +70,23 @@ inline size_t NumBufferArgs(const std::vector<TVMType>& arg_types);
 
 // implementations details
 namespace detail {
-template <typename T, int kSize>
+template<typename T, int kSize>
 class TempArray {
  public:
   explicit TempArray(int size) {}
-  T* data() { return data_; }
-
+  T* data() {
+    return data_;
+  }
  private:
   T data_[kSize];
 };
-template <typename T>
+template<typename T>
 class TempArray<T, 0> {
  public:
   explicit TempArray(int size) : data_(size) {}
-  T* data() { return data_.data(); }
-
+  T* data() {
+    return data_.data();
+  }
  private:
   std::vector<T> data_;
 };
@@ -121,9 +119,8 @@ inline ArgConvertCode GetArgConvertCode(TVMType t) {
   return HANDLE_TO_HANDLE;
 }
 
-template <int N, typename F>
-inline PackedFunc PackFuncVoidAddr_(F f,
-                                    const std::vector<ArgConvertCode>& codes) {
+template<int N, typename F>
+inline PackedFunc PackFuncVoidAddr_(F f, const std::vector<ArgConvertCode>& codes) {
   int num_args = static_cast<int>(codes.size());
   auto ret = [f, codes, num_args](TVMArgs args, TVMRetValue* ret) {
     TempArray<void*, N> addr_(num_args);
@@ -143,7 +140,7 @@ inline PackedFunc PackFuncVoidAddr_(F f,
           addr[i] = &(holder[i]);
           break;
         }
-        case INT64_TO_UINT32: {
+        case INT64_TO_UINT32 : {
           holder[i].v_uint32 = static_cast<uint32_t>(args.values[i].v_int64);
           addr[i] = &(holder[i]);
           break;
@@ -160,7 +157,7 @@ inline PackedFunc PackFuncVoidAddr_(F f,
   return PackedFunc(ret);
 }
 
-template <int N, typename F>
+template<int N, typename F>
 inline PackedFunc PackFuncNonBufferArg_(
     F f, int base, const std::vector<ArgConvertCode>& codes) {
   int num_args = static_cast<int>(codes.size());
@@ -171,27 +168,22 @@ inline PackedFunc PackFuncNonBufferArg_(
       switch (codes[i]) {
         case INT64_TO_INT64:
         case FLOAT64_TO_FLOAT64: {
-          LOG(FATAL) << "Donot support 64bit argument to device function";
-          break;
+          LOG(FATAL) << "Donot support 64bit argument to device function"; break;
         }
         case INT64_TO_INT32: {
-          holder[i].v_int32 =
-              static_cast<int32_t>(args.values[base + i].v_int64);
+          holder[i].v_int32 = static_cast<int32_t>(args.values[base + i].v_int64);
           break;
         }
-        case INT64_TO_UINT32: {
-          holder[i].v_uint32 =
-              static_cast<uint32_t>(args.values[base + i].v_int64);
+        case INT64_TO_UINT32 : {
+          holder[i].v_uint32 = static_cast<uint32_t>(args.values[base + i].v_int64);
           break;
         }
         case FLOAT64_TO_FLOAT32: {
-          holder[i].v_float32 =
-              static_cast<float>(args.values[base + i].v_float64);
+          holder[i].v_float32 = static_cast<float>(args.values[base + i].v_float64);
           break;
         }
         case HANDLE_TO_HANDLE: {
-          LOG(FATAL) << "not reached";
-          break;
+          LOG(FATAL) << "not reached"; break;
         }
       }
     }
@@ -200,9 +192,9 @@ inline PackedFunc PackFuncNonBufferArg_(
   return PackedFunc(ret);
 }
 
-template <int N, typename F>
-inline PackedFunc PackFuncPackedArg_(F f,
-                                     const std::vector<ArgConvertCode>& codes) {
+template<int N, typename F>
+inline PackedFunc PackFuncPackedArg_(
+    F f, const std::vector<ArgConvertCode>& codes) {
   int num_args = static_cast<int>(codes.size());
   auto ret = [f, codes, num_args](TVMArgs args, TVMRetValue* ret) {
     TempArray<uint64_t, N> pack_(num_args);
@@ -228,7 +220,7 @@ inline PackedFunc PackFuncPackedArg_(F f,
           ++ptr;
           break;
         }
-        case INT64_TO_UINT32: {
+        case INT64_TO_UINT32 : {
           *reinterpret_cast<uint32_t*>(ptr) =
               static_cast<uint32_t>(args.values[i].v_int64);
           ++ptr;
@@ -241,8 +233,7 @@ inline PackedFunc PackFuncPackedArg_(F f,
           break;
         }
         default: {
-          LOG(FATAL) << "not reached";
-          break;
+          LOG(FATAL) << "not reached"; break;
         }
       }
     }
@@ -252,7 +243,7 @@ inline PackedFunc PackFuncPackedArg_(F f,
 }
 }  // namespace detail
 
-template <typename F>
+template<typename F>
 inline PackedFunc PackFuncVoidAddr(F f, const std::vector<TVMType>& arg_types) {
   std::vector<detail::ArgConvertCode> codes(arg_types.size());
   for (size_t i = 0; i < arg_types.size(); ++i) {
@@ -273,8 +264,7 @@ inline size_t NumBufferArgs(const std::vector<TVMType>& arg_types) {
   size_t base = arg_types.size();
   for (size_t i = 0; i < arg_types.size(); ++i) {
     if (arg_types[i].code != kHandle) {
-      base = i;
-      break;
+      base = i; break;
     }
   }
   for (size_t i = base; i < arg_types.size(); ++i) {
@@ -284,9 +274,8 @@ inline size_t NumBufferArgs(const std::vector<TVMType>& arg_types) {
   return base;
 }
 
-template <typename F>
-inline PackedFunc PackFuncNonBufferArg(F f,
-                                       const std::vector<TVMType>& arg_types) {
+template<typename F>
+inline PackedFunc PackFuncNonBufferArg(F f, const std::vector<TVMType>& arg_types) {
   size_t num_buffer = NumBufferArgs(arg_types);
   std::vector<detail::ArgConvertCode> codes;
   for (size_t i = num_buffer; i < arg_types.size(); ++i) {
@@ -302,9 +291,8 @@ inline PackedFunc PackFuncNonBufferArg(F f,
   }
 }
 
-template <typename F>
-inline PackedFunc PackFuncPackedArg(F f,
-                                    const std::vector<TVMType>& arg_types) {
+template<typename F>
+inline PackedFunc PackFuncPackedArg(F f, const std::vector<TVMType>& arg_types) {
   std::vector<detail::ArgConvertCode> codes;
   for (size_t i = 0; i < arg_types.size(); ++i) {
     codes.push_back(detail::GetArgConvertCode(arg_types[i]));
@@ -319,4 +307,4 @@ inline PackedFunc PackFuncPackedArg(F f,
 }
 }  // namespace runtime
 }  // namespace TVM
-#endif  // RUNTIME_PACK_ARGS_H_
+#endif  // TVM_RUNTIME_PACK_ARGS_H_

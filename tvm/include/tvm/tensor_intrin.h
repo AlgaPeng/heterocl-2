@@ -7,8 +7,8 @@
 #define TVM_TENSOR_INTRIN_H_
 
 #include <string>
-#include "./buffer.h"
 #include "./tensor.h"
+#include "./buffer.h"
 
 namespace TVM {
 
@@ -74,8 +74,12 @@ class TensorIntrinNode : public Node {
     v->Visit("reduce_update", &reduce_update);
   }
 
-  static TensorIntrin make(std::string name, Operation op, Array<Tensor> inputs,
-                           Array<Buffer> buffers, Stmt body, Stmt reduce_init,
+  static TensorIntrin make(std::string name,
+                           Operation op,
+                           Array<Tensor> inputs,
+                           Array<Buffer> buffers,
+                           Stmt body,
+                           Stmt reduce_init,
                            Stmt reduce_update);
 
   static constexpr const char* _type_key = "TensorIntrin";

@@ -2,9 +2,9 @@
  *  Copyright (c) 2016 by Contributors
  * \file auto_inline_elem_wise.cc
  */
-#include <tvm/ir_visitor.h>
-#include <tvm/operation.h>
 #include <tvm/schedule_pass.h>
+#include <tvm/operation.h>
+#include <tvm/ir_visitor.h>
 
 namespace TVM {
 namespace schedule {
@@ -42,7 +42,15 @@ class ElemWiseDetector : public ir::IRVisitor {
   Array<IterVar> axis_;
 };
 
-bool IsElemWise(const Operation& op) { return false; }
+
+bool IsElemWise(const Operation& op) {
+  if (const ComputeOpNode* compute = op.as<ComputeOpNode>()) {
+    ElemWiseDetector v = ElemWiseDetector(compute->axis);
+    for (auto& e : compute->body) v.Visit(e);
+    return v.is_elem_wise_;
+  }
+  return false;
+}
 
 void AutoInlineElemWise(Schedule sch) {
   for (Stage s : sch->stages) {
@@ -52,7 +60,15 @@ void AutoInlineElemWise(Schedule sch) {
   }
 }
 
-bool IsBroadcast(const Operation& op) { return false; }
+bool IsBroadcast(const Operation& op) {
+  if (const ComputeOpNode* compute = op.as<ComputeOpNode>()) {
+    if (compute->reduce_axis.size()) {
+      return false;
+    }
+    // TODO(nicolasvasilache): Implement Me
+  }
+  return false;
+}
 
 void AutoInlineBroadcast(Schedule sch) {
   for (Stage s : sch->stages) {
@@ -62,7 +78,12 @@ void AutoInlineBroadcast(Schedule sch) {
   }
 }
 
-bool IsInjective(const Operation& op) { return false; }
+bool IsInjective(const Operation& op) {
+  if (const ComputeOpNode* compute = op.as<ComputeOpNode>()) {
+    return compute->reduce_axis.size() == 0;
+  }
+  return false;
+}
 
 void AutoInlineInjective(Schedule sch) {
   for (Stage s : sch->stages) {

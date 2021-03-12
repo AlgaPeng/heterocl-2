@@ -33,10 +33,10 @@ setup_kwargs = {
 
 setup(
   name = "heterocl",
-  version = "0.3",
+  version = "0.1",
   packages = find_packages(),
   install_requires=[
-      'numpy==1.18.5',
+      'numpy',
       'decorator',
       'networkx',
       'matplotlib',

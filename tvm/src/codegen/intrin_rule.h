@@ -3,12 +3,12 @@
  * \file intrin_rule.h
  * \brief Utility to generate intrinsic rules
  */
-#ifndef CODEGEN_INTRIN_RULE_H_
-#define CODEGEN_INTRIN_RULE_H_
+#ifndef TVM_CODEGEN_INTRIN_RULE_H_
+#define TVM_CODEGEN_INTRIN_RULE_H_
 
-#include <tvm/api_registry.h>
-#include <tvm/expr.h>
 #include <tvm/ir.h>
+#include <tvm/expr.h>
+#include <tvm/api_registry.h>
 #include <tvm/runtime/registry.h>
 #include <string>
 
@@ -32,18 +32,21 @@ struct FloatSuffix {
 
 // Return the intrinsic name
 struct Direct {
-  std::string operator()(Type t, std::string name) const { return name; }
+  std::string operator()(Type t, std::string name) const {
+    return name;
+  }
 };
 
 // Call pure extern function.
-template <typename T>
+template<typename T>
 inline void DispatchExtern(const TVMArgs& args, TVMRetValue* rv) {
   Expr e = args[0];
   const Call* call = e.as<Call>();
   CHECK(call != nullptr);
   std::string name = T()(call->type, call->name);
   if (name.length() != 0) {
-    *rv = Call::make(call->type, name, call->args, Call::PureExtern);
+    *rv = Call::make(
+        call->type, name, call->args, Call::PureExtern);
   } else {
     *rv = e;
   }
@@ -52,4 +55,4 @@ inline void DispatchExtern(const TVMArgs& args, TVMRetValue* rv) {
 }  // namespace intrin
 }  // namespace codegen
 }  // namespace TVM
-#endif  // CODEGEN_INTRIN_RULE_H_
+#endif  // TVM_CODEGEN_INTRIN_RULE_H_

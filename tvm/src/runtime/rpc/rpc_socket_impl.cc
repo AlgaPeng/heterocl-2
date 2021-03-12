@@ -5,18 +5,19 @@
  */
 #include <tvm/runtime/registry.h>
 #include <memory>
-#include "../../common/socket.h"
 #include "./rpc_session.h"
+#include "../../common/socket.h"
 
 namespace TVM {
 namespace runtime {
 
 class SockChannel final : public RPCChannel {
  public:
-  explicit SockChannel(common::TCPSocket sock) : sock_(sock) {}
+  explicit SockChannel(common::TCPSocket sock)
+      : sock_(sock) {}
   ~SockChannel() {
     if (!sock_.BadSocket()) {
-      sock_.Close();
+        sock_.Close();
     }
   }
   size_t Send(const void* data, size_t size) final {
@@ -38,12 +39,13 @@ class SockChannel final : public RPCChannel {
   common::TCPSocket sock_;
 };
 
-std::shared_ptr<RPCSession> RPCConnect(std::string url, int port,
-                                       std::string key) {
+std::shared_ptr<RPCSession>
+RPCConnect(std::string url, int port, std::string key) {
   common::TCPSocket sock;
   common::SockAddr addr(url.c_str(), port);
   sock.Create();
-  CHECK(sock.Connect(addr)) << "Connect to " << addr.AsString() << " failed";
+  CHECK(sock.Connect(addr))
+      << "Connect to " << addr.AsString() << " failed";
   // hand shake
   std::ostringstream os;
   int code = kRPCMagic;
@@ -66,8 +68,7 @@ std::shared_ptr<RPCSession> RPCConnect(std::string url, int port,
     sock.Close();
     LOG(FATAL) << "URL " << url << ":" << port << " is not TVM RPC server";
   }
-  return RPCSession::Create(std::unique_ptr<SockChannel>(new SockChannel(sock)),
-                            key);
+  return RPCSession::Create(std::unique_ptr<SockChannel>(new SockChannel(sock)), key);
 }
 
 Module RPCClientConnect(std::string url, int port, std::string key) {
@@ -75,18 +76,21 @@ Module RPCClientConnect(std::string url, int port, std::string key) {
 }
 
 void RPCServerLoop(int sockfd) {
-  common::TCPSocket sock(static_cast<common::TCPSocket::SockType>(sockfd));
-  RPCSession::Create(std::unique_ptr<SockChannel>(new SockChannel(sock)),
-                     "SockServerLoop")
-      ->ServerLoop();
+  common::TCPSocket sock(
+      static_cast<common::TCPSocket::SockType>(sockfd));
+  RPCSession::Create(
+      std::unique_ptr<SockChannel>(new SockChannel(sock)),
+                     "SockServerLoop")->ServerLoop();
 }
 
 TVM_REGISTER_GLOBAL("contrib.rpc._Connect")
-    .set_body([](TVMArgs args, TVMRetValue* rv) {
-      *rv = RPCClientConnect(args[0], args[1], args[2]);
-    });
+.set_body([](TVMArgs args, TVMRetValue* rv) {
+    *rv = RPCClientConnect(args[0], args[1], args[2]);
+  });
 
 TVM_REGISTER_GLOBAL("contrib.rpc._ServerLoop")
-    .set_body([](TVMArgs args, TVMRetValue* rv) { RPCServerLoop(args[0]); });
+.set_body([](TVMArgs args, TVMRetValue* rv) {
+    RPCServerLoop(args[0]);
+  });
 }  // namespace runtime
 }  // namespace TVM

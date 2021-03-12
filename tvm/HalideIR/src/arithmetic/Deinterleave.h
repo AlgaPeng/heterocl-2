@@ -1,6 +1,3 @@
-/*!
- *  Copyright (c) 2016 by Contributors
- */
 #ifndef DEINTERLEAVE_H
 #define DEINTERLEAVE_H
 
@@ -25,7 +22,7 @@ EXPORT Expr extract_even_lanes(Expr a);
 /** Extract the nth lane of a vector */
 EXPORT Expr extract_lane(Expr vec, int lane);
 
-}  // namespace Internal
-}  // namespace Halide
+}
+}
 
 #endif

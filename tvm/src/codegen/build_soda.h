@@ -1,14 +1,13 @@
-/*!
- *  Copyright (c) 2019 by Contributors
- */
-#ifndef CODEGEN_BUILD_SODA_H_
-#define CODEGEN_BUILD_SODA_H_
+#ifndef BUILD_SODA_H
+#define BUILD_SODA_H
+
+#include <fstream>
 
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <tvm/base.h>
 #include <unistd.h>
-#include <fstream>
+
+#include <tvm/base.h>
 
 namespace TVM {
 namespace codegen {
@@ -16,6 +15,6 @@ namespace codegen {
 void SODA2HLSC(std::string& code);
 
 }
-}  // namespace TVM
+}
 
-#endif  // CODEGEN_BUILD_SODA_H_
+#endif

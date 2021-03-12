@@ -3,14 +3,14 @@
  * \file rocm_module.h
  * \brief Execution handling of ROCM kernels
  */
-#ifndef RUNTIME_ROCM_ROCM_MODULE_H_
-#define RUNTIME_ROCM_ROCM_MODULE_H_
+#ifndef TVM_RUNTIME_ROCM_ROCM_MODULE_H_
+#define TVM_RUNTIME_ROCM_ROCM_MODULE_H_
 
 #include <tvm/runtime/config.h>
 #include <tvm/runtime/module.h>
 #include <memory>
-#include <string>
 #include <vector>
+#include <string>
 #include "../meta_data.h"
 
 namespace TVM {
@@ -27,9 +27,12 @@ static constexpr const int kMaxNumGPUs = 32;
  * \param fmap The map function information map of each function.
  * \param rocm_source Optional, rocm source file
  */
-Module ROCMModuleCreate(std::string data, std::string fmt,
-                        std::unordered_map<std::string, FunctionInfo> fmap,
-                        std::string rocm_source, std::string assembly);
+Module ROCMModuleCreate(
+    std::string data,
+    std::string fmt,
+    std::unordered_map<std::string, FunctionInfo> fmap,
+    std::string rocm_source,
+    std::string assembly);
 }  // namespace runtime
 }  // namespace TVM
-#endif  // RUNTIME_ROCM_ROCM_MODULE_H_
+#endif  // TVM_RUNTIME_ROCM_ROCM_MODULE_H_

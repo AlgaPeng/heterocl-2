@@ -6,15 +6,15 @@
 #ifndef TVM_TENSOR_H_
 #define TVM_TENSOR_H_
 
-#include <ir/FunctionBase.h>
 #include <tvm/container.h>
+#include <ir/FunctionBase.h>
 #include <string>
-#include <type_traits>
 #include <vector>
+#include <type_traits>
 
-#include "./arithmetic.h"
 #include "./base.h"
 #include "./expr.h"
+#include "./arithmetic.h"
 
 namespace TVM {
 
@@ -57,8 +57,8 @@ class Tensor : public NodeRef {
    * \param args The indices
    * \return the result expression representing tensor read.
    */
-  template <typename... Args>
-  inline Expr operator()(Args&&... args) const {
+  template<typename... Args>
+  inline Expr operator()(Args&& ...args) const {
     Array<Expr> indices{std::forward<Args>(args)...};
     return operator()(indices);
   }
@@ -98,7 +98,9 @@ class Tensor : public NodeRef {
      *  This is only valid when all the coordinates are fully specified.
      * \return the corresponding expression of this slice.
      */
-    inline operator Expr() const { return tensor_(indices_); }
+    inline operator Expr() const {
+      return tensor_(indices_);
+    }
 
    private:
     const Tensor& tensor_;
@@ -109,7 +111,9 @@ class Tensor : public NodeRef {
    * \param i the index of the coordinate
    * \return the subsequent slice.
    */
-  inline Slice operator[](Expr i) const { return Slice(*this, {i}); }
+  inline Slice operator[](Expr i) const {
+    return Slice(*this, {i});
+  }
   /*! \brief specify container node */
   using ContainerType = TensorNode;
 };
@@ -155,12 +159,15 @@ class TensorNode : public Node {
     v->Visit("op", &op);
     v->Visit("value_index", &value_index);
   }
-  TVM_DLL static Tensor make(Array<Expr> shape, Type dtype, Operation op,
+  TVM_DLL static Tensor make(Array<Expr> shape,
+                             Type dtype,
+                             Operation op,
                              int value_index);
 
   static constexpr const char* _type_key = "Tensor";
   TVM_DECLARE_NODE_TYPE_INFO(TensorNode, Node);
 };
+
 
 // Implementations of inline functions
 inline const TensorNode* Tensor::operator->() const {
@@ -171,36 +178,38 @@ inline TensorNode* Tensor::operator->() {
   return static_cast<TensorNode*>(node_.get());
 }
 
-inline size_t Tensor::ndim() const { return (*this)->shape.size(); }
+inline size_t Tensor::ndim() const {
+  return (*this)->shape.size();
+}
 
 inline bool Tensor::operator==(const Tensor& other) const {
   if (get() == other.get()) return true;
   if (get() == nullptr || other.get() == nullptr) return false;
   if ((*this)->op.defined() || other->op.defined()) {
     return (*this)->op == other->op &&
-           (*this)->value_index == other->value_index;
+        (*this)->value_index == other->value_index;
   } else {
     return false;
   }
 }
 
 // macro to turn every operation of slice to expression
-#define DEFINE_OVERLOAD_SLICE_UNARY_OP(Op)          \
-  inline Expr operator Op(const Tensor::Slice& a) { \
-    return Op a.operator Expr();                    \
-  }
+#define DEFINE_OVERLOAD_SLICE_UNARY_OP(Op)                              \
+  inline Expr operator Op (const Tensor::Slice& a) {                    \
+    return Op a.operator Expr() ;                                       \
+  }                                                                     \
 
-#define DEFINE_OVERLOAD_SLICE_BINARY_OP(Op)                                 \
-  template <typename T>                                                     \
-  inline Expr operator Op(const Tensor::Slice& a, const T& b) {             \
-    return a.operator Expr() Op b;                                          \
-  }                                                                         \
-  template <typename T>                                                     \
-  inline Expr operator Op(const T& a, const Tensor::Slice& b) {             \
-    return a Op b.operator Expr();                                          \
-  }                                                                         \
-  inline Expr operator Op(const Tensor::Slice& a, const Tensor::Slice& b) { \
-    return a.operator Expr() Op b.operator Expr();                          \
+#define DEFINE_OVERLOAD_SLICE_BINARY_OP(Op)                             \
+  template<typename T>                                                  \
+  inline Expr operator Op (const Tensor::Slice& a, const T& b) {        \
+    return a.operator Expr() Op b;                                      \
+  }                                                                     \
+  template<typename T>                                                  \
+  inline Expr operator Op (const T& a, const Tensor::Slice& b) {        \
+    return a Op b.operator Expr();                                      \
+  }                                                                     \
+  inline Expr operator Op (const Tensor::Slice& a, const Tensor::Slice& b) { \
+    return a.operator Expr() Op b.operator Expr();                      \
   }
 
 DEFINE_OVERLOAD_SLICE_UNARY_OP(!);
@@ -226,7 +235,9 @@ DEFINE_OVERLOAD_SLICE_BINARY_OP(<);  // NOLINT(*)
 namespace std {
 template <>
 struct hash<::TVM::Operation> {
-  std::size_t operator()(const ::TVM::Operation& k) const { return k.hash(); }
+  std::size_t operator()(const ::TVM::Operation& k) const {
+    return k.hash();
+  }
 };
 
 template <>
@@ -234,7 +245,7 @@ struct hash<::TVM::Tensor> {
   std::size_t operator()(const ::TVM::Tensor& k) const {
     if (k.defined() && k->op.defined()) {
       return k->op.hash();
-    } else {
+    } else{
       return k.hash();
     }
   }

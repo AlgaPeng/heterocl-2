@@ -1,6 +1,3 @@
-/*!
- *  Copyright (c) 2016 by Contributors
- */
 #ifndef HALIDEIR_DEBUG_H
 #define HALIDEIR_DEBUG_H
 
@@ -8,9 +5,9 @@
  * Defines functions for debug logging during code generation.
  */
 
-#include <stdlib.h>
 #include <iostream>
 #include <string>
+#include <stdlib.h>
 #include "Util.h"
 
 namespace Halide {
@@ -30,7 +27,7 @@ struct Stmt;
 EXPORT std::ostream &operator<<(std::ostream &stream, const Stmt &);
 
 struct LoweredFunc;
-EXPORT std::ostream &operator<<(std::ostream &, const LoweredFunc &);
+EXPORT std::ostream &operator << (std::ostream &, const LoweredFunc &);
 
 /** For optional debugging during codegen, use the debug class as
  * follows:
@@ -47,23 +44,23 @@ EXPORT std::ostream &operator<<(std::ostream &, const LoweredFunc &);
  */
 
 class debug {
-  const bool logging;
+    const bool logging;
 
- public:
-  explicit debug(int verbosity) : logging(verbosity <= debug_level()) {}
+public:
+    debug(int verbosity) : logging(verbosity <= debug_level()) {}
 
-  template <typename T>
-  debug &operator<<(T &&x) {
-    if (logging) {
-      std::cerr << std::forward<T>(x);
+    template<typename T>
+    debug &operator<<(T&& x) {
+        if (logging) {
+            std::cerr << std::forward<T>(x);
+        }
+        return *this;
     }
-    return *this;
-  }
 
-  EXPORT static int debug_level();
+    EXPORT static int debug_level();
 };
 
-}  // namespace Internal
-}  // namespace Halide
+}
+}
 
 #endif

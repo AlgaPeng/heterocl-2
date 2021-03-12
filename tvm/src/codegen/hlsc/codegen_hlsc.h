@@ -1,8 +1,10 @@
 /*!
  *  Copyright (c) 2018 by Contributors
+ * \file codegen_vhls.h
+ * \brief Generate HLS C kernel code.
  */
-#ifndef CODEGEN_HLSC_CODEGEN_HLSC_H_
-#define CODEGEN_HLSC_CODEGEN_HLSC_H_
+#ifndef TVM_CODEGEN_CODEGEN_HLSC_H_
+#define TVM_CODEGEN_CODEGEN_HLSC_H_
 
 #include <tvm/codegen.h>
 #include <tvm/packed_func_ext.h>
@@ -26,7 +28,7 @@ class CodeGenHLSC : public CodeGenC {
   void VisitStmt_(const Allocate* op) override;
 
   void GenForStmt(const For* op, std::string pragma, bool before);
-
+  
  protected:
   std::string GetBufferRef(Type t, const Variable* buffer, Expr index);
 };
@@ -34,4 +36,4 @@ class CodeGenHLSC : public CodeGenC {
 }  // namespace codegen
 }  // namespace TVM
 
-#endif  // CODEGEN_HLSC_CODEGEN_HLSC_H_
+#endif  // TVM_CODEGEN_CODEGEN_HLSC_H_

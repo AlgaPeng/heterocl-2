@@ -3,8 +3,8 @@
  * \file codegen_xocl_host.h
  * \brief Generate cpp kernel code for XOCL.
  */
-#ifndef CODEGEN_OPENCL_CODEGEN_XOCL_HOST_H_
-#define CODEGEN_OPENCL_CODEGEN_XOCL_HOST_H_
+#ifndef TVM_CODEGEN_CODEGEN_XOCL_HOST_H_
+#define TVM_CODEGEN_CODEGEN_XOCL_HOST_H_
 
 #include <tvm/codegen.h>
 #include <tvm/packed_func_ext.h>
@@ -31,7 +31,7 @@ class CodeGenXOCLHost : public CodeGenC {
   void VisitStmt_(const ExternModule* op) override;
 
   void GenForStmt(const For* op, std::string pragma, bool before);
-
+  
  protected:
   std::string GetBufferRef(Type t, const Variable* buffer, Expr index);
 };
@@ -39,4 +39,4 @@ class CodeGenXOCLHost : public CodeGenC {
 }  // namespace codegen
 }  // namespace TVM
 
-#endif  // CODEGEN_OPENCL_CODEGEN_XOCL_HOST_H_
+#endif  // TVM_CODEGEN_CODEGEN_HLSC_H_

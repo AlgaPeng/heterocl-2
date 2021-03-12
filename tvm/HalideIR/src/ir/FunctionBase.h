@@ -1,12 +1,10 @@
 /*!
  *  Copyright (c) 2016 by Contributors
  * \file FunctionBase.h
- * \brief The function reference data structure to hold the function without
- * defining it.
+ * \brief The function reference data structure to hold the function without defining it.
  *
- *  This is used because Function is a high level object that can contain
- * schedule, which could have many variations. Removing FunctionContent dep from
- * IR makes IR minimum.
+ *  This is used because Function is a high level object that can contain schedule,
+ *  which could have many variations. Removing FunctionContent dep from IR makes IR minimum.
  */
 #ifndef HALIDEIR_IR_FUNCTION_BASE_H_
 #define HALIDEIR_IR_FUNCTION_BASE_H_
@@ -25,7 +23,7 @@ class FunctionRef : public NodeRef {
  public:
   /*! \brief constructor */
   FunctionRef() {}
-  explicit FunctionRef(std::shared_ptr<Node> n) : NodeRef(n) {}
+  FunctionRef(std::shared_ptr<Node> n) : NodeRef(n) {}
   /*!
    * \brief access the internal node container
    * \return the pointer to the internal node container

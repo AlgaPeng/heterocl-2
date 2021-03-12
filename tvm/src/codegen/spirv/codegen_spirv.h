@@ -3,8 +3,8 @@
  * \file ir_builder.h
  * \brief Utility for building SPIRV code block
  */
-#ifndef CODEGEN_SPIRV_CODEGEN_SPIRV_H_
-#define CODEGEN_SPIRV_CODEGEN_SPIRV_H_
+#ifndef TVM_CODEGEN_SPIRV_CODEGEN_SPIRV_H_
+#define TVM_CODEGEN_SPIRV_CODEGEN_SPIRV_H_
 
 #include <tvm/ir.h>
 #include <tvm/ir_functor_ext.h>
@@ -12,8 +12,8 @@
 
 #include <vector>
 
-#include "../../runtime/thread_storage_scope.h"
 #include "./ir_builder.h"
+#include "../../runtime/thread_storage_scope.h"
 
 namespace TVM {
 namespace codegen {
@@ -23,8 +23,9 @@ using namespace ir;
 /*!
  * \brief Code generator into SPIRV
  */
-class CodeGenSPIRV : public ExprFunctor<spirv::Value(const Expr&)>,
-                     public StmtFunctor<void(const Stmt&)> {
+class CodeGenSPIRV:
+      public ExprFunctor<spirv::Value(const Expr&)>,
+      public StmtFunctor<void(const Stmt&)> {
  public:
   /*!
    * \brief Compile and add function f to the current module.
@@ -37,7 +38,9 @@ class CodeGenSPIRV : public ExprFunctor<spirv::Value(const Expr&)>,
    * \param e The expression to be created value for.
    * \return created value.
    */
-  spirv::Value MakeValue(const Expr& e) { return VisitExpr(e); }
+  spirv::Value MakeValue(const Expr& e) {
+    return VisitExpr(e);
+  }
   // override codegen
   spirv::Value VisitExpr_(const Variable* op) override;
   spirv::Value VisitExpr_(const Cast* op) override;
@@ -107,7 +110,8 @@ class CodeGenSPIRV : public ExprFunctor<spirv::Value(const Expr&)>,
   // Get the thread index
   spirv::Value GetThreadIndex(const IterVar& iv, const Expr& extent);
   spirv::Value CreateStorageSync(const Call* op);
-  void Scalarize(const Expr& e, std::function<void(int i, spirv::Value v)> f);
+  void Scalarize(const Expr& e,
+                 std::function<void(int i, spirv::Value v)> f);
   // The builder
   std::unique_ptr<spirv::IRBuilder> builder_;
   // Work group size of three
@@ -125,4 +129,5 @@ class CodeGenSPIRV : public ExprFunctor<spirv::Value(const Expr&)>,
 }  // namespace codegen
 }  // namespace TVM
 
-#endif  // CODEGEN_SPIRV_CODEGEN_SPIRV_H_
+
+#endif  // TVM_CODEGEN_SPIRV_CODEGEN_SPIRV_H_

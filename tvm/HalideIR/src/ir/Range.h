@@ -1,5 +1,7 @@
 /*!
  *  Copyright (c) 2016 by Contributors
+ * \file Range.h
+ * \brief The Range data structure
  */
 #ifndef HALIDEIR_IR_RANGE_H_
 #define HALIDEIR_IR_RANGE_H_
@@ -18,7 +20,7 @@ class Range : public NodeRef {
  public:
   /*! \brief constructor */
   Range() {}
-  explicit Range(std::shared_ptr<Node> n) : NodeRef(n) {}
+  Range(std::shared_ptr<Node> n) : NodeRef(n) {}
   /*!
    * \brief access the internal node container
    * \return the pointer to the internal node container
@@ -70,9 +72,8 @@ inline Range Range::make_by_min_extent(Expr min, Expr extent) {
 }
 
 // overload print function
-inline std::ostream& operator<<(std::ostream& os,
-                                const Range& r) {  // NOLINT(*)
-  os << "Range(min=" << r->min << ", extent=" << r->extent << ')';
+inline std::ostream& operator<<(std::ostream &os, const Range& r) {  // NOLINT(*)
+  os << "Range(min=" << r->min << ", extent=" << r->extent <<')';
   return os;
 }
 

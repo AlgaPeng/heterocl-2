@@ -1,6 +1,3 @@
-/*!
- *  Copyright (c) 2016 by Contributors
- */
 #ifndef HALIDEIR_SUBSTITUTE_H
 #define HALIDEIR_SUBSTITUTE_H
 
@@ -34,10 +31,8 @@ EXPORT inline Stmt substitute(const VarExpr& var, Expr replacement, Stmt stmt) {
 
 /** Substitute variables with pointers in the map. */
 // @{
-EXPORT Expr substitute(const std::map<const Variable*, Expr>& replacements,
-                       Expr expr);
-EXPORT Stmt substitute(const std::map<const Variable*, Expr>& replacements,
-                       Stmt stmt);
+EXPORT Expr substitute(const std::map<const Variable*, Expr> &replacements, Expr expr);
+EXPORT Stmt substitute(const std::map<const Variable*, Expr> &replacements, Stmt stmt);
 // @}
 
 /** Substitute expressions for other expressions. */
@@ -67,7 +62,7 @@ Expr substitute_in_all_lets(Expr expr);
 Stmt substitute_in_all_lets(Stmt stmt);
 // @}
 
-}  // namespace Internal
-}  // namespace Halide
+}
+}
 
 #endif

@@ -6,10 +6,10 @@
 #include <dmlc/logging.h>
 #include <dmlc/thread_local.h>
 #include <tvm/runtime/registry.h>
-#include <array>
-#include <memory>
-#include <mutex>
 #include <unordered_map>
+#include <mutex>
+#include <memory>
+#include <array>
 #include "./runtime_base.h"
 
 namespace TVM {
@@ -18,10 +18,9 @@ namespace runtime {
 struct Registry::Manager {
   // map storing the functions.
   // We delibrately used raw pointer
-  // This is because PackedFunc can contain callbacks into the host
-  // languge(python) and the resource can become invalid because of
-  // indeterminstic order of destruction. The resources will only be recycled
-  // during program exit.
+  // This is because PackedFunc can contain callbacks into the host languge(python)
+  // and the resource can become invalid because of indeterminstic order of destruction.
+  // The resources will only be recycled during program exit.
   std::unordered_map<std::string, Registry*> fmap;
   // vtable for extension type
   std::array<ExtTypeVTable, kExtEnd> ext_vtable;
@@ -45,8 +44,7 @@ Registry& Registry::set_body(PackedFunc f) {  // NOLINT(*)
   return *this;
 }
 
-Registry& Registry::Register(const std::string& name,
-                             bool override) {  // NOLINT(*)
+Registry& Registry::Register(const std::string& name, bool override) {  // NOLINT(*)
   Manager* m = Manager::Global();
   std::lock_guard<std::mutex> lock(m->mutex);
   auto it = m->fmap.find(name);
@@ -56,7 +54,8 @@ Registry& Registry::Register(const std::string& name,
     m->fmap[name] = r;
     return *r;
   } else {
-    CHECK(override) << "Global PackedFunc " << name << " is already registered";
+    CHECK(override)
+      << "Global PackedFunc " << name << " is already registered";
     return *it->second;
   }
 }
@@ -83,7 +82,7 @@ std::vector<std::string> Registry::ListNames() {
   std::lock_guard<std::mutex> lock(m->mutex);
   std::vector<std::string> keys;
   keys.reserve(m->fmap.size());
-  for (const auto& kv : m->fmap) {
+  for (const auto &kv : m->fmap) {
     keys.push_back(kv.first);
   }
   return keys;
@@ -93,12 +92,13 @@ ExtTypeVTable* ExtTypeVTable::Get(int type_code) {
   CHECK(type_code > kExtBegin && type_code < kExtEnd);
   Registry::Manager* m = Registry::Manager::Global();
   ExtTypeVTable* vt = &(m->ext_vtable[type_code]);
-  CHECK(vt->destroy != nullptr) << "Extension type not registered";
+  CHECK(vt->destroy != nullptr)
+      << "Extension type not registered";
   return vt;
 }
 
-ExtTypeVTable* ExtTypeVTable::RegisterInternal(int type_code,
-                                               const ExtTypeVTable& vt) {
+ExtTypeVTable* ExtTypeVTable::RegisterInternal(
+    int type_code, const ExtTypeVTable& vt) {
   CHECK(type_code > kExtBegin && type_code < kExtEnd);
   Registry::Manager* m = Registry::Manager::Global();
   std::lock_guard<std::mutex> lock(m->mutex);
@@ -114,7 +114,7 @@ struct TVMFuncThreadLocalEntry {
   /*! \brief result holder for returning strings */
   std::vector<std::string> ret_vec_str;
   /*! \brief result holder for returning string pointers */
-  std::vector<const char*> ret_vec_charp;
+  std::vector<const char *> ret_vec_charp;
 };
 
 /*! \brief Thread local store that can be used to hold return values. */
@@ -126,7 +126,8 @@ int TVMExtTypeFree(void* handle, int type_code) {
   API_END();
 }
 
-int TVMFuncRegisterGlobal(const char* name, TVMFunctionHandle f, int override) {
+int TVMFuncRegisterGlobal(
+    const char* name, TVMFunctionHandle f, int override) {
   API_BEGIN();
   TVM::runtime::Registry::Register(name, override != 0)
       .set_body(*static_cast<TVM::runtime::PackedFunc*>(f));
@@ -135,7 +136,8 @@ int TVMFuncRegisterGlobal(const char* name, TVMFunctionHandle f, int override) {
 
 int TVMFuncGetGlobal(const char* name, TVMFunctionHandle* out) {
   API_BEGIN();
-  const TVM::runtime::PackedFunc* fp = TVM::runtime::Registry::Get(name);
+  const TVM::runtime::PackedFunc* fp =
+      TVM::runtime::Registry::Get(name);
   if (fp != nullptr) {
     *out = new TVM::runtime::PackedFunc(*fp);  // NOLINT(*)
   } else {
@@ -144,9 +146,10 @@ int TVMFuncGetGlobal(const char* name, TVMFunctionHandle* out) {
   API_END();
 }
 
-int TVMFuncListGlobalNames(int* out_size, const char*** out_array) {
+int TVMFuncListGlobalNames(int *out_size,
+                           const char*** out_array) {
   API_BEGIN();
-  TVMFuncThreadLocalEntry* ret = TVMFuncThreadLocalStore::Get();
+  TVMFuncThreadLocalEntry *ret = TVMFuncThreadLocalStore::Get();
   ret->ret_vec_str = TVM::runtime::Registry::ListNames();
   ret->ret_vec_charp.clear();
   for (size_t i = 0; i < ret->ret_vec_str.size(); ++i) {

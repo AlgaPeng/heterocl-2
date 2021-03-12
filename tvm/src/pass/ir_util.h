@@ -3,8 +3,8 @@
  * \file ir_util.h
  * \brief Helper functions to construct and compose IR nodes.
  */
-#ifndef PASS_IR_UTIL_H_
-#define PASS_IR_UTIL_H_
+#ifndef TVM_PASS_IR_UTIL_H_
+#define TVM_PASS_IR_UTIL_H_
 
 #include <tvm/ir.h>
 #include <tvm/runtime/device_api.h>
@@ -44,7 +44,7 @@ Stmt MergeSeq(const std::vector<Stmt>& seq);
  * \return if update happens, return the new array, else return the
  *  original array
  */
-template <typename T, typename F>
+template<typename T, typename F>
 inline Array<T> UpdateArray(Array<T> arr, F fupdate) {
   std::vector<T> new_arr(arr.size());
   bool changed = false;
@@ -69,12 +69,14 @@ inline Array<T> UpdateArray(Array<T> arr, F fupdate) {
  * \param kind The data kind.
  * \return the get expression.
  */
-inline Expr TVMStructGet(Type dtype, Var handle, int index,
-                         intrinsic::TVMStructFieldKind kind) {
-  Array<Expr> args = {handle, make_const(Int(32), index),
-                      make_const(Int(32), kind)};
-  return Call::make(dtype, intrinsic::tvm_struct_get, args,
-                    Call::PureIntrinsic);
+inline Expr TVMStructGet(
+    Type dtype, Var handle, int index,
+    intrinsic::TVMStructFieldKind kind) {
+  Array<Expr> args ={
+    handle,
+    make_const(Int(32), index),
+    make_const(Int(32), kind)};
+  return Call::make(dtype, intrinsic::tvm_struct_get, args, Call::PureIntrinsic);
 }
 
 /*!
@@ -104,7 +106,8 @@ inline Expr AddressOffset(Var handle, Type dtype, Expr offset) {
   }
   return Call::make(
       Handle(), intrinsic::tvm_address_of,
-      {Load::make(dtype, handle, offset, const_true(dtype.lanes()))},
+      {Load::make(dtype, handle, offset,
+                  const_true(dtype.lanes()))},
       Call::PureIntrinsic);
 }
 
@@ -116,10 +119,14 @@ inline Expr AddressOffset(Var handle, Type dtype, Expr offset) {
  * \param value The value to be set.
  * \return the set stmt.
  */
-inline Stmt TVMStructSet(Var handle, int index,
-                         intrinsic::TVMStructFieldKind kind, Expr value) {
-  Array<Expr> args = {handle, make_const(Int(32), index),
-                      make_const(Int(32), kind), value};
+inline Stmt TVMStructSet(
+    Var handle, int index,
+    intrinsic::TVMStructFieldKind kind, Expr value) {
+  Array<Expr> args ={
+    handle,
+    make_const(Int(32), index),
+    make_const(Int(32), kind),
+    value};
   return Evaluate::make(
       Call::make(Int(32), intrinsic::tvm_struct_set, args, Call::Intrinsic));
 }
@@ -131,7 +138,8 @@ inline Stmt TVMStructSet(Var handle, int index,
  */
 inline Type APIType(Type t) {
   if (t.is_handle()) return t;
-  CHECK_EQ(t.lanes(), 1) << "Cannot pass vector type through packed API.";
+  CHECK_EQ(t.lanes(), 1)
+      << "Cannot pass vector type through packed API.";
   if (t.is_ufixed() || t.is_fixed()) return Int(64);
   CHECK(t.is_float());
   return Float(64);
@@ -146,8 +154,7 @@ inline Type APIType(Type t) {
 inline int GetTempAllocaAlignment(Type type, int32_t const_size) {
   int align = runtime::kTempAllocaAlignment;
   if (const_size > 0) {
-    int64_t const_s =
-        static_cast<int64_t>(const_size) * type.bits() * type.lanes() / 8;
+    int64_t const_s = static_cast<int64_t>(const_size) * type.bits() * type.lanes() / 8;
     while (align > const_s) {
       align = align / 2;
     }
@@ -156,4 +163,4 @@ inline int GetTempAllocaAlignment(Type type, int32_t const_size) {
 }
 }  // namespace ir
 }  // namespace TVM
-#endif  // PASS_IR_UTIL_H_
+#endif  // TVM_PASS_IR_UTIL_H_
